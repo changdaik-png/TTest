@@ -44,7 +44,7 @@ export default function Auth() {
         placeholder="Email" 
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+        className="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-black"
         disabled={loading}
       />
       <input 
@@ -52,7 +52,7 @@ export default function Auth() {
         placeholder="Password" 
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+        className="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-black"
         disabled={loading}
       />
       <div className="flex justify-between gap-3 mt-2">

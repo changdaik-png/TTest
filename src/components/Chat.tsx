@@ -9,6 +9,7 @@ type Message = {
 export default function Chat({ email }: { email?: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   const fetchMessages = async () => {
     const res = await fetch('/api/messages');
@@ -35,6 +36,37 @@ export default function Chat({ email }: { email?: string }) {
     fetchMessages();
   };
 
+  const handleAskAI = async () => {
+    if (!inputText.trim()) return;
+    setIsAiLoading(true);
+    
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: inputText }),
+      });
+      const data = await res.json();
+      
+      if (data.text) {
+        // Send AI message to redis
+        await fetch('/api/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: data.text, user: '✨ Gemini AI' }),
+        });
+        setInputText('');
+        fetchMessages();
+      } else if (data.error) {
+        alert(data.error);
+      }
+    } catch (e) {
+      alert("AI thinking failed. Check API key.");
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-96 max-w-md mx-auto border rounded-xl overflow-hidden shadow-lg mt-10">
       <div className="bg-gray-800 text-white p-4 font-bold text-center">Chat App</div>
@@ -52,13 +84,22 @@ export default function Chat({ email }: { email?: string }) {
           placeholder="Type your message..."
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black shadow-inner"
+          disabled={isAiLoading}
         />
         <button 
           onClick={handleSend}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors whitespace-nowrap"
+          disabled={isAiLoading}
         >
           Send
+        </button>
+        <button 
+          onClick={handleAskAI}
+          className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors whitespace-nowrap"
+          disabled={isAiLoading}
+        >
+          {isAiLoading ? 'Thinking...' : 'Ask Gemini'}
         </button>
       </div>
     </div>
